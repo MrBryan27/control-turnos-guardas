@@ -18,6 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const filtroAdmin = document.getElementById("filtroAdmin");
 const filtroGuarda = document.getElementById("filtroGuarda");
+const btnBorrarTodos = document.getElementById("btnBorrarTodos");
+btnBorrarTodos.addEventListener("click", borrarTodosMisTurnos);
+
 
 
   /* ========= CERRAR SESIÓN ========= */
@@ -142,6 +145,44 @@ const filtroGuarda = document.getElementById("filtroGuarda");
   });
 }
 
+async function borrarTodosMisTurnos() {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const confirmar = confirm(
+    "⚠️ Esta acción eliminará TODOS tus turnos.\n\n¿Deseas continuar?"
+  );
+
+  if (!confirmar) return;
+
+  try {
+    const snap = await db.collection("turnos")
+      .where("uid", "==", user.uid)
+      .get();
+
+    if (snap.empty) {
+      alert("No tienes turnos para borrar");
+      return;
+    }
+
+    const batch = db.batch();
+
+    snap.docs.forEach(doc => {
+      batch.delete(doc.ref);
+    });
+
+    await batch.commit();
+
+    alert("✅ Todos tus turnos fueron eliminados");
+    cargarTurnos();
+
+  } catch (error) {
+    console.error(error);
+    alert("❌ Error al borrar los turnos");
+  }
+}
+
+
 
   /* ========= AUTH ========= */
   auth.onAuthStateChanged(async user => {
@@ -158,7 +199,15 @@ const filtroGuarda = document.getElementById("filtroGuarda");
     cargarGuardas();
   }
 
+  if (esAdmin) {
+  btnBorrarTodos.style.display = "none";
+}
+
+
     cargarTurnos();
   });
 
 });
+
+
+
