@@ -1,109 +1,81 @@
-/* ================= RESET ================= */
 * {
   box-sizing: border-box;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Arial, sans-serif;
 }
 
 body {
   margin: 0;
   padding: 10px;
-  background: #f2f4f7;
+  background: #f4f6f8;
 }
 
-/* ================= HEADER ================= */
+/* HEADER */
 .top-bar {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 10px;
 }
 
-h1 {
-  width: 100%;
-  text-align: center;
-  margin: 10px 0;
-}
-
-/* ================= BOTONES ================= */
 button {
   padding: 8px 12px;
   border: none;
   border-radius: 4px;
-  background: #1976d2;
-  color: #fff;
   cursor: pointer;
 }
 
-button:hover {
-  background: #125aa3;
+.btn-logout {
+  background: #1e88e5;
+  color: #fff;
 }
 
-button.danger {
-  background: #d32f2f;
-}
-
-button.danger:hover {
-  background: #b71c1c;
-}
-
-/* ================= FILTRO ADMIN ================= */
+/* FILTRO ADMIN */
 .filtro-admin {
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0;
 }
 
-.filtro-admin input,
-.filtro-admin select {
+.filtro-admin select,
+.filtro-admin input {
   padding: 8px;
-  min-width: 220px;
+  width: 100%;
 }
 
-
-
-/* ================= FORM TURNO ================= */
+/* FORMULARIO */
 .form-turno {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: 1fr;
   gap: 8px;
-  margin: 15px 0;
+  margin-bottom: 10px;
 }
 
-.form-turno input {
-  width: 100%;
+.form-turno input,
+.form-turno select {
   padding: 8px;
 }
 
-/* ================= RESUMEN ================= */
-.resumen {
-  display: flex;
-  justify-content: space-between;
-  background: #fff;
-  padding: 10px;
-  border-radius: 6px;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-  gap: 8px;
-  font-weight: bold;
+.form-turno button {
+  background: #1e88e5;
+  color: #fff;
 }
 
-/* ================= TABLA ================= */
-.table-container {
+/* TABLA RESPONSIVE */
+.tabla-container {
+  overflow-x: auto;
   background: #fff;
   border-radius: 6px;
-  overflow-x: auto;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1000px;
+  min-width: 900px;
 }
 
 th, td {
   border: 1px solid #ccc;
-  padding: 8px;
+  padding: 6px;
   text-align: center;
   font-size: 14px;
 }
@@ -112,42 +84,51 @@ th {
   background: #e0e0e0;
 }
 
-/* ================= BOTON BORRAR ================= */
-.btn-delete {
+/* BOTONES INFERIORES */
+.acciones {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn-danger {
   background: #d32f2f;
-  color: white;
-  padding: 6px 10px;
-  border-radius: 4px;
-  border: none;
-  cursor: pointer;
+  color: #fff;
 }
 
-.btn-delete:hover {
-  background: #b71c1c;
+.btn-excel {
+  background: #1e88e5;
+  color: #fff;
 }
 
-/* ================= MOBILE ================= */
-@media (max-width: 768px) {
+/* ===================== */
+/*  TABLET Y DESKTOP */
+/* ===================== */
+@media (min-width: 768px) {
 
   .top-bar {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .filtro-admin {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .filtro-admin select,
+  .filtro-admin input {
+    width: auto;
   }
 
   .form-turno {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(6, 1fr);
+    align-items: end;
   }
 
-  button {
-    width: 100%;
-  }
-
-  .resumen {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  th, td {
-    font-size: 13px;
+  .acciones {
+    flex-direction: row;
   }
 }

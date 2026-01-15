@@ -2,71 +2,108 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Turnos</title>
+  <title>Control Mensual de Turnos</title>
 
+  <!-- Responsive -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="turnos.css">
+
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-  <link rel="stylesheet" href="turnos.css">
+  <!-- Excel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
+
 <body>
 
-<button id="btnLogout">Cerrar sesión</button>
+  <!-- ================== HEADER ================== -->
+  <div class="top-bar">
+    <button id="btnLogout" class="btn-logout">Cerrar sesión</button>
 
-<div id="filtroAdmin" class="filtro-admin" style="display:none;">
-  <label>Filtrar por guarda:</label>
+    <!-- SOLO ADMIN -->
+    <div id="filtroAdmin" class="filtro-admin" style="display:none;">
+      <label>Filtrar por guarda:</label>
 
-  <select id="filtroGuarda">
-    <option value="" hidden>Seleccionar guarda</option>
-  </select>
+      <select id="filtroGuarda">
+        <option value="">Seleccionar guarda</option>
+      </select>
 
-  <input
-    type="text"
-    id="busquedaNombre"
-    placeholder="Buscar por nombre del guarda"
-  >
-</div>
+      <input
+        type="text"
+        id="busquedaNombre"
+        placeholder="Buscar por nombre del guarda"
+      >
+    </div>
+  </div>
 
+  <h2>Control Mensual de Turnos</h2>
 
+  <!-- ================== FORMULARIO ================== -->
+  <div class="form-turno">
 
+    <input
+      type="text"
+      id="servicio"
+      placeholder="Lugar del servicio"
+    >
 
-<h2>Control Mensual de Turnos</h2>
+    <input type="date" id="fi">
+    <input type="time" id="hi">
 
-<input id="servicio" placeholder="Lugar del servicio">
-<input type="date" id="fi">
-<input type="time" id="hi">
-<input type="date" id="ff">
-<input type="time" id="hf">
-<input id="obs" placeholder="Observaciones">
-<button id="btnGuardar">Guardar</button>
+    <input type="date" id="ff">
+    <input type="time" id="hf">
 
-<table id="tabla">
-  <thead>
-    <tr>
-      <th>Guarda</th>
-      <th>Cédula</th>
-      <th>Servicio</th>
-      <th>Inicio</th>
-      <th>Fin</th>
-      <th>Horas</th>
-      <th>Bruto</th>
-      <th>Neto</th>
-      <th>Acción</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+    <input
+      type="text"
+      id="obs"
+      placeholder="Observaciones"
+    >
 
-<button id="btnBorrarTodos" style="background:#c62828;color:white;">
-  🗑️ Borrar todos mis turnos
-</button>
+    <button id="btnGuardar">Guardar</button>
+  </div>
 
+  <!-- ================== TABLA ================== -->
+  <div class="tabla-container">
+    <table id="tabla">
+      <thead>
+        <tr>
+          <th>Guarda</th>
+          <th>Cédula</th>
+          <th>Servicio</th>
+          <th>Inicio</th>
+          <th>Fin</th>
+          <th>Horas</th>
+          <th>Bruto</th>
+          <th>Neto</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
 
-<button id="btnExcel">Exportar Excel</button>
+      <tbody>
+        <!-- JS carga aquí -->
+      </tbody>
+    </table>
+  </div>
 
-<script src="firebase.js"></script>
-<script src="turnos.js"></script>
+  <!-- ================== ACCIONES ================== -->
+  <div class="acciones">
+    <button id="btnBorrarTodo" class="btn-danger">
+      🗑️ Borrar todos mis turnos
+    </button>
+
+    <button id="btnExcel" class="btn-excel">
+      Exportar Excel
+    </button>
+  </div>
+
+  <!-- ================== JS ================== -->
+  <script src="firebase.js"></script>
+  <script src="turnos.js"></script>
+
 </body>
 </html>
