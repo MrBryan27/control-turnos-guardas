@@ -16,6 +16,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnGuardar = document.getElementById("btnGuardar");
   const btnLogout = document.getElementById("btnLogout");
 
+  const filtroAdmin = document.getElementById("filtroAdmin");
+const filtroGuarda = document.getElementById("filtroGuarda");
+
+
   /* ========= CERRAR SESIÓN ========= */
   btnLogout.addEventListener("click", async () => {
     await auth.signOut();
@@ -69,40 +73,48 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ========= CARGAR TURNOS ========= */
-  async function cargarTurnos() {
-    const user = auth.currentUser;
-    if (!user) return;
+ async function cargarTurnos() {
+  const user = auth.currentUser;
+  if (!user) return;
 
-    tablaBody.innerHTML = "";
+  tablaBody.innerHTML = "";
 
-    let query = db.collection("turnos");
-    if (!esAdmin) {
-      query = query.where("uid", "==", user.uid);
+  let query = db.collection("turnos");
+
+  // 👮 ADMIN
+  if (esAdmin) {
+    if (filtroGuarda.value) {
+      query = query.where("uid", "==", filtroGuarda.value);
     }
-
-    const snap = await query.orderBy("creado", "desc").get();
-
-    for (const d of snap.docs) {
-      const t = d.data();
-      const u = await obtenerUsuario(t.uid);
-
-      tablaBody.innerHTML += `
-        <tr>
-          <td>${u.nombreCompleto}</td>
-          <td>${u.cedula}</td>
-          <td>${t.servicio}</td>
-          <td>${t.fi} ${t.hi}</td>
-          <td>${t.ff} ${t.hf}</td>
-          <td>${t.horas.toFixed(2)}</td>
-          <td>${t.bruto.toFixed(0)}</td>
-          <td>${t.neto.toFixed(0)}</td>
-          <td>
-            <button onclick="borrarTurno('${d.id}')">🗑️</button>
-          </td>
-        </tr>
-      `;
-    }
+  } 
+  // 👷 GUARDA
+  else {
+    query = query.where("uid", "==", user.uid);
   }
+
+  const snap = await query.orderBy("creado", "desc").get();
+
+  for (const d of snap.docs) {
+    const t = d.data();
+    const u = await obtenerUsuario(t.uid);
+
+    tablaBody.innerHTML += `
+      <tr>
+        <td>${u.nombreCompleto}</td>
+        <td>${u.cedula}</td>
+        <td>${t.servicio}</td>
+        <td>${t.fi} ${t.hi}</td>
+        <td>${t.ff} ${t.hf}</td>
+        <td>${t.horas.toFixed(2)}</td>
+        <td>${t.bruto.toFixed(0)}</td>
+        <td>${t.neto.toFixed(0)}</td>
+        <td>
+          <button onclick="borrarTurno('${d.id}')">🗑️</button>
+        </td>
+      </tr>
+    `;
+  }
+}
 
   /* ========= BORRAR TURNO ========= */
   window.borrarTurno = async (id) => {
@@ -110,6 +122,26 @@ document.addEventListener("DOMContentLoaded", () => {
     await db.collection("turnos").doc(id).delete();
     cargarTurnos();
   };
+
+  async function cargarGuardas() {
+  const snap = await db.collection("usuarios").get();
+
+  filtroGuarda.innerHTML = `<option value="">Todos</option>`;
+
+  snap.forEach(doc => {
+    const u = doc.data();
+
+    // solo mostrar guardas (no admins)
+    if (u.rol === "guarda") {
+      filtroGuarda.innerHTML += `
+        <option value="${doc.id}">
+          ${u.nombreCompleto} - ${u.cedula}
+        </option>
+      `;
+    }
+  });
+}
+
 
   /* ========= AUTH ========= */
   auth.onAuthStateChanged(async user => {
@@ -120,6 +152,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const perfil = await db.collection("usuarios").doc(user.uid).get();
     esAdmin = perfil.exists && perfil.data().rol === "admin";
+
+      if (esAdmin) {
+    filtroAdmin.style.display = "block";
+    cargarGuardas();
+  }
 
     cargarTurnos();
   });
