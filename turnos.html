@@ -15,12 +15,21 @@
 
 <button id="btnLogout">Cerrar sesión</button>
 
-<div id="filtroAdmin" style="display:none; margin-bottom:10px;">
+<div id="filtroAdmin" class="filtro-admin" style="display:none;">
   <label>Filtrar por guarda:</label>
+
   <select id="filtroGuarda">
-    <option value="">Todos</option>
+    <option value="" hidden>Seleccionar guarda</option>
   </select>
+
+  <input
+    type="text"
+    id="busquedaNombre"
+    placeholder="Buscar por nombre del guarda"
+  >
 </div>
+
+
 
 
 <h2>Control Mensual de Turnos</h2>
