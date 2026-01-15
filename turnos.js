@@ -166,23 +166,61 @@ async function borrarTurno(id) {
   cargarTurnos();
 }
 
-async function borrarTodosMisTurnos() {
+// async function borrarTodosMisTurnos() {
+//   const user = auth.currentUser;
+//   if (!user) return;
+
+//   if (!confirm("¿Eliminar TODOS tus turnos?")) return;
+
+//   const snap = await db.collection("turnos")
+//     .where("uid", "==", user.uid)
+//     .get();
+
+//   const batch = db.batch();
+//   snap.forEach(doc => batch.delete(doc.ref));
+//   await batch.commit();
+
+//   tablaBody.innerHTML = "";
+//   cargarTurnos();
+// }
+
+// ================== BORRAR TODOS MIS TURNOS ==================
+const btnBorrarTodo = document.getElementById("btnBorrarTodo");
+
+btnBorrarTodo.addEventListener("click", async () => {
   const user = auth.currentUser;
   if (!user) return;
 
-  if (!confirm("¿Eliminar TODOS tus turnos?")) return;
+  if (!confirm("¿Seguro que deseas borrar TODOS tus turnos?")) return;
 
-  const snap = await db.collection("turnos")
-    .where("uid", "==", user.uid)
-    .get();
+  try {
+    const snap = await db
+      .collection("turnos")
+      .where("uid", "==", user.uid)
+      .get();
 
-  const batch = db.batch();
-  snap.forEach(doc => batch.delete(doc.ref));
-  await batch.commit();
+    if (snap.empty) {
+      alert("No tienes turnos para borrar");
+      return;
+    }
 
-  tablaBody.innerHTML = "";
-  cargarTurnos();
-}
+    const batch = db.batch();
+
+    snap.forEach(doc => {
+      batch.delete(doc.ref);
+    });
+
+    await batch.commit();
+
+    alert("Todos tus turnos fueron eliminados");
+    cargarTurnos();
+
+  } catch (error) {
+    console.error(error);
+    alert("Error al borrar los turnos");
+  }
+});
+
 
 function limpiarFormulario() {
   servicio.value = fi.value = hi.value = ff.value = hf.value = obs.value = "";
