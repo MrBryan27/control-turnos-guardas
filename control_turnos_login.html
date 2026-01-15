@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="loginBox">
+  <h2>Login</h2>
+  <input id="loginEmail" placeholder="Correo">
+  <input id="loginPassword" type="password" placeholder="Contraseña">
+  <button id="btnLogin">Entrar</button>
+  <button id="btnMostrarRegistro">Registrarse</button>
+</div>
+
+<div id="registroBox" class="hidden">
+  <h2>Registro</h2>
+  <input id="regNombre" placeholder="Nombre completo">
+  <input id="regCedula" placeholder="Cédula">
+  <input id="regEmail" placeholder="Correo">
+  <input id="regPassword" type="password" placeholder="Contraseña">
+  <button id="btnRegistrar">Registrar</button>
+  <button id="btnVolverLogin">Volver</button>
+</div>
+
+<script src="firebase.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
