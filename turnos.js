@@ -26,7 +26,7 @@ btnBorrarTodos.addEventListener("click", borrarTodosMisTurnos);
   /* ========= CERRAR SESIÓN ========= */
   btnLogout.addEventListener("click", async () => {
     await auth.signOut();
-    window.location.href = "control_turnos_login.html";
+    window.location.href = "index.html";
   });
 
   /* ========= GUARDAR TURNO ========= */
