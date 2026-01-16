@@ -242,6 +242,32 @@ async function borrarTodosMisTurnos() {
   }
 }
 
+/* ================= EXCEL ================= */
+
+if (btnExcel) {
+  btnExcel.addEventListener("click", exportarExcel);
+}
+
+function exportarExcel() {
+  const tabla = document.getElementById("tabla");
+
+  if (!tabla || tabla.rows.length <= 1) {
+    alert("No hay datos para exportar");
+    return;
+  }
+
+  try {
+    const wb = XLSX.utils.table_to_book(tabla, {
+      sheet: "Turnos"
+    });
+
+    XLSX.writeFile(wb, "turnos.xlsx");
+  } catch (error) {
+    console.error(error);
+    alert("Error al exportar el archivo Excel");
+  }
+}
+
 /* ================= AUTH ================= */
 auth.onAuthStateChanged(async user => {
   if (!user) {
@@ -265,3 +291,6 @@ auth.onAuthStateChanged(async user => {
 
 filtroGuarda.onchange = cargarTurnos;
 busquedaNombre.oninput = cargarTurnos;
+
+
+
