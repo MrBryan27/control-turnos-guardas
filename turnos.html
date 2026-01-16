@@ -3,11 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Control Mensual de Turnos</title>
-
-  <!-- Responsive -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- CSS -->
   <link rel="stylesheet" href="turnos.css">
 
   <!-- Firebase -->
@@ -16,66 +13,45 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <!-- Excel -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
 
-  <!-- ================== HEADER ================== -->
-  <div class="top-bar">
-    <button id="btnLogout" class="btn-logout">Cerrar sesión</button>
+<div class="contenedor">
 
-    <!-- SOLO ADMIN -->
-    <div id="filtroAdmin" class="filtro-admin" style="display:none;">
-      <label>Filtrar por guarda:</label>
+  <button id="btnLogout" class="btn btn-azul">Cerrar sesión</button>
 
-      <select id="filtroGuarda">
-        <option value="">Seleccionar guarda</option>
-      </select>
+  <!-- FILTRO ADMIN -->
+  <div id="filtroAdmin" class="filtro-admin" style="display:none;">
+    <label>Filtrar por guarda:</label>
 
-      <input
-        type="text"
-        id="busquedaNombre"
-        placeholder="Buscar por nombre del guarda"
-      >
-    </div>
-  </div>
-
-  <h2>Control Mensual de Turnos</h2>
-
-  <!-- ================== FORMULARIO ================== -->
-  <div class="form-turno">
+    <select id="filtroGuarda">
+      <option value="">Seleccionar guarda</option>
+    </select>
 
     <input
       type="text"
-      id="servicio"
-      placeholder="Lugar del servicio"
+      id="busquedaNombre"
+      placeholder="Buscar por nombre del guarda"
     >
+  </div>
 
-    <label for="fi">Fecha de inicio</label>
+  <h1>Control Mensual de Turnos</h1>
+
+  <!-- FORMULARIO -->
+  <div class="formulario">
+    <input type="text" id="servicio" placeholder="Lugar del servicio">
     <input type="date" id="fi">
-
-    <label for="hi">Hora de inicio</label>
     <input type="time" id="hi">
-    
-    <label for="ff">Fecha final</label>
     <input type="date" id="ff">
-
-    <label for="hf">Hora final</label>
     <input type="time" id="hf">
-
-
-    <input
-      type="text"
-      id="obs"
-      placeholder="Observaciones"
-    >
-
-    <button id="btnGuardar">Guardar</button>
+    <input type="text" id="obs" placeholder="Observaciones">
+    <button id="btnGuardar" class="btn btn-azul">Guardar</button>
   </div>
 
-  <!-- ================== TABLA ================== -->
-  <div class="tabla-container">
+  <!-- TABLA -->
+  <div class="tabla-responsive">
     <table id="tabla">
       <thead>
         <tr>
@@ -87,30 +63,32 @@
           <th>Horas</th>
           <th>Bruto</th>
           <th>Neto</th>
+          <th>Estado</th>
           <th>Acción</th>
         </tr>
       </thead>
-
-      <tbody>
-        <!-- JS carga aquí -->
-      </tbody>
+      <tbody></tbody>
     </table>
   </div>
 
-  <!-- ================== ACCIONES ================== -->
-  <div class="acciones">
-    <button id="btnBorrarTodo" class="btn-danger">
-      🗑️ Borrar todos mis turnos
-    </button>
-
-    <button id="btnExcel" class="btn-excel">
-      Exportar Excel
-    </button>
+  <!-- TOTALES -->
+  <div class="totales">
+    <p>Total bruto registrado: <strong id="totalBruto">$0</strong></p>
+    <p>Total neto registrado: <strong id="totalNeto">$0</strong></p>
+    <p>Total bruto a pagar: <strong id="totalBrutoPagar">$0</strong></p>
+    <p>Total neto a pagar: <strong id="totalNetoPagar">$0</strong></p>
   </div>
 
-  <!-- ================== JS ================== -->
-  <script src="firebase.js"></script>
-  <script src="turnos.js"></script>
+  <!-- BOTONES -->
+  <div class="acciones">
+    <button id="btnBorrarTodo" class="btn-danger">🗑️ Borrar todos mis turnos</button>
+    <button id="btnExcel" class="btn btn-azul">Exportar Excel</button>
+  </div>
+
+</div>
+
+<script src="firebase.js"></script>
+<script src="turnos.js"></script>
 
 </body>
 </html>

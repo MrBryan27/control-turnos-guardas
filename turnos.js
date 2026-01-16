@@ -1,12 +1,5 @@
-
-
-/* ================= CONSTANTES ================= */
 const VALOR_HORA = 8775;
-let esAdmin = false;
-const usuariosCache = {};
-let filtroTimeout = null;
 
-/* ================= ELEMENTOS ================= */
 const servicio = document.getElementById("servicio");
 const fi = document.getElementById("fi");
 const hi = document.getElementById("hi");
@@ -15,60 +8,48 @@ const hf = document.getElementById("hf");
 const obs = document.getElementById("obs");
 
 const btnGuardar = document.getElementById("btnGuardar");
-const btnExcel = document.getElementById("btnExcel");
 const btnLogout = document.getElementById("btnLogout");
-const btnBorrarTodos = document.getElementById("btnBorrarTodos");
+const btnExcel = document.getElementById("btnExcel");
+const btnBorrarTodo = document.getElementById("btnBorrarTodo");
 
 const tablaBody = document.querySelector("#tabla tbody");
+
 const filtroAdmin = document.getElementById("filtroAdmin");
 const filtroGuarda = document.getElementById("filtroGuarda");
 const busquedaNombre = document.getElementById("busquedaNombre");
 
-/* ================= EVENTOS ================= */
-btnGuardar.addEventListener("click", guardarTurno);
-btnExcel.addEventListener("click", exportarExcel);
+const totalBruto = document.getElementById("totalBruto");
+const totalNeto = document.getElementById("totalNeto");
+const totalBrutoPagar = document.getElementById("totalBrutoPagar");
+const totalNetoPagar = document.getElementById("totalNetoPagar");
 
-btnLogout.addEventListener("click", async () => {
+let esAdmin = false;
+let cacheUsuarios = {};
+let turnoEditando = null;
+
+/* ================= LOGOUT ================= */
+btnLogout.onclick = async () => {
   await auth.signOut();
   window.location.href = "index.html";
-});
+};
 
-if (btnBorrarTodos) {
-  btnBorrarTodos.addEventListener("click", borrarTodosMisTurnos);
-}
-
-filtroGuarda.addEventListener("change", () => {
-  busquedaNombre.value = "";
-  cargarTurnos();
-});
-
-busquedaNombre.addEventListener("input", () => {
-  clearTimeout(filtroTimeout);
-  filtroTimeout = setTimeout(() => {
-    filtroGuarda.value = "";
-    cargarTurnos();
-  }, 300);
-});
-
-/* ================= FUNCIONES ================= */
-
-async function guardarTurno() {
+/* ================= GUARDAR / CORREGIR ================= */
+btnGuardar.onclick = async () => {
   const user = auth.currentUser;
-  if (!user) return alert("Debe iniciar sesión");
-
-  if (!servicio.value.trim()) return alert("Ingrese el servicio");
-  if (!fi.value || !hi.value || !ff.value || !hf.value)
-    return alert("Complete fecha y hora");
+  if (!user) return;
 
   const inicio = new Date(`${fi.value}T${hi.value}`);
   const fin = new Date(`${ff.value}T${hf.value}`);
   const horas = (fin - inicio) / 3600000;
 
-  if (horas <= 0) return alert("Horas inválidas");
+  if (horas <= 0) {
+    alert("Fechas u horas inválidas");
+    return;
+  }
 
-  await db.collection("turnos").add({
+  const data = {
     uid: user.uid,
-    servicio: servicio.value.trim(),
+    servicio: servicio.value,
     fi: fi.value,
     hi: hi.value,
     ff: ff.value,
@@ -76,53 +57,81 @@ async function guardarTurno() {
     horas,
     bruto: horas * VALOR_HORA,
     neto: horas * VALOR_HORA * 0.92,
-    observaciones: obs.value || "",
+    estado: "pendiente",
+    comentarioGuarda: "",
+    comentarioAdmin: "",
     creado: firebase.firestore.FieldValue.serverTimestamp()
-  });
+  };
+
+  if (turnoEditando) {
+    data.estado = "corregido";
+    data.comentarioGuarda = obs.value;
+
+    await db.collection("turnos").doc(turnoEditando).update(data);
+    turnoEditando = null;
+  } else {
+    await db.collection("turnos").add(data);
+  }
 
   limpiarFormulario();
   cargarTurnos();
-}
+};
 
-async function obtenerUsuario(uid) {
-  if (usuariosCache[uid]) return usuariosCache[uid];
-
-  const doc = await db.collection("usuarios").doc(uid).get();
-  if (!doc.exists) {
-    usuariosCache[uid] = { nombreCompleto: "SIN PERFIL", cedula: "" };
-    return usuariosCache[uid];
-  }
-
-  usuariosCache[uid] = doc.data();
-  return doc.data();
-}
-
+/* ================= CARGAR TURNOS ================= */
 async function cargarTurnos() {
-  const user = auth.currentUser;
-  if (!user) return;
+  tablaBody.innerHTML = "";
 
-  tablaBody.innerHTML = ""; // 🔥 CLAVE PARA NO DUPLICAR
+  let bruto = 0, neto = 0, brutoPagar = 0, netoPagar = 0;
 
-  let query = db.collection("turnos").orderBy("creado", "desc");
+  let query = db.collection("turnos");
 
   if (!esAdmin) {
-    query = query.where("uid", "==", user.uid);
+    query = query.where("uid", "==", auth.currentUser.uid);
   } else if (filtroGuarda.value) {
     query = query.where("uid", "==", filtroGuarda.value);
   }
 
-  const snapshot = await query.get();
+  const snap = await query.get();
 
-  for (const doc of snapshot.docs) {
+  for (const doc of snap.docs) {
     const t = doc.data();
     const u = await obtenerUsuario(t.uid);
 
     if (
       busquedaNombre.value &&
-      !u.nombreCompleto
-        .toLowerCase()
-        .includes(busquedaNombre.value.toLowerCase())
+      !u.nombreCompleto.toLowerCase().includes(busquedaNombre.value.toLowerCase())
     ) continue;
+
+    bruto += t.bruto;
+    neto += t.neto;
+
+    if (t.estado === "aprobado") {
+      brutoPagar += t.bruto;
+      netoPagar += t.neto;
+    }
+
+    let acciones = "";
+
+    /* ===== ACCIONES GUARDA ===== */
+    if (!esAdmin && t.estado === "rechazado") {
+      acciones = `
+        <div class="comentario rojo">
+          <strong>Admin:</strong> ${t.comentarioAdmin}
+        </div>
+        <button onclick="editarTurno('${doc.id}', '${t.servicio}', '${t.fi}', '${t.hi}', '${t.ff}', '${t.hf}')">
+          ✏️ Corregir
+        </button>
+      `;
+    }
+
+    /* ===== ACCIONES ADMIN ===== */
+    if (esAdmin) {
+      acciones = `
+        <button onclick="aprobar('${doc.id}')">✔</button>
+        <button onclick="rechazar('${doc.id}')">✖</button>
+        ${t.comentarioGuarda ? `<div class="comentario azul"><strong>Guarda:</strong> ${t.comentarioGuarda}</div>` : ""}
+      `;
+    }
 
     tablaBody.innerHTML += `
       <tr>
@@ -132,66 +141,78 @@ async function cargarTurnos() {
         <td>${t.fi} ${t.hi}</td>
         <td>${t.ff} ${t.hf}</td>
         <td>${t.horas.toFixed(2)}</td>
-        <td>${t.bruto.toFixed(0)}</td>
-        <td>${t.neto.toFixed(0)}</td>
-        <td>${t.observaciones || ""}</td>
-        <td>
-          <button class="btn-delete" onclick="borrarTurno('${doc.id}')">🗑️</button>
-        </td>
+        <td>$${t.bruto.toFixed(0)}</td>
+        <td>$${t.neto.toFixed(0)}</td>
+        <td>${t.estado}</td>
+        <td>${acciones}</td>
       </tr>
     `;
   }
+
+  totalBruto.innerText = `$${bruto.toFixed(0)}`;
+  totalNeto.innerText = `$${neto.toFixed(0)}`;
+  totalBrutoPagar.innerText = `$${brutoPagar.toFixed(0)}`;
+  totalNetoPagar.innerText = `$${netoPagar.toFixed(0)}`;
 }
 
-async function cargarGuardas() {
-  filtroGuarda.innerHTML = `<option value="">Seleccionar guarda</option>`;
+/* ================= EDITAR ================= */
+function editarTurno(id, s, fiV, hiV, ffV, hfV) {
+  turnoEditando = id;
+  servicio.value = s;
+  fi.value = fiV;
+  hi.value = hiV;
+  ff.value = ffV;
+  hf.value = hfV;
+  obs.value = "";
+}
 
-  const snap = await db.collection("usuarios").get();
-  snap.forEach(doc => {
-    const u = doc.data();
-    if (u.nombreCompleto) {
-      filtroGuarda.innerHTML += `
-        <option value="${doc.id}">
-          ${u.nombreCompleto} - ${u.cedula}
-        </option>
-      `;
-    }
+/* ================= ADMIN ================= */
+async function aprobar(id) {
+  await db.collection("turnos").doc(id).update({
+    estado: "aprobado",
+    comentarioAdmin: ""
   });
-}
-
-async function borrarTurno(id) {
-  if (!confirm("¿Eliminar este turno?")) return;
-  await db.collection("turnos").doc(id).delete();
-  tablaBody.innerHTML = "";
   cargarTurnos();
 }
 
-// async function borrarTodosMisTurnos() {
-//   const user = auth.currentUser;
-//   if (!user) return;
+async function rechazar(id) {
+  const motivo = prompt("Motivo del rechazo:");
+  if (!motivo) return;
 
-//   if (!confirm("¿Eliminar TODOS tus turnos?")) return;
+  await db.collection("turnos").doc(id).update({
+    estado: "rechazado",
+    comentarioAdmin: motivo
+  });
+  cargarTurnos();
+}
 
-//   const snap = await db.collection("turnos")
-//     .where("uid", "==", user.uid)
-//     .get();
+/* ================= UTIL ================= */
+function limpiarFormulario() {
+  servicio.value = fi.value = hi.value = ff.value = hf.value = obs.value = "";
+}
 
-//   const batch = db.batch();
-//   snap.forEach(doc => batch.delete(doc.ref));
-//   await batch.commit();
+async function obtenerUsuario(uid) {
+  if (cacheUsuarios[uid]) return cacheUsuarios[uid];
+  const doc = await db.collection("usuarios").doc(uid).get();
+  cacheUsuarios[uid] = doc.data();
+  return doc.data();
+}
 
-//   tablaBody.innerHTML = "";
-//   cargarTurnos();
-// }
+/* ================= BORRAR TODOS LOS TURNOS ================= */
 
-// ================== BORRAR TODOS MIS TURNOS ==================
-const btnBorrarTodo = document.getElementById("btnBorrarTodo");
+if (btnBorrarTodo) {
+  btnBorrarTodo.addEventListener("click", borrarTodosMisTurnos);
+}
 
-btnBorrarTodo.addEventListener("click", async () => {
+async function borrarTodosMisTurnos() {
   const user = auth.currentUser;
   if (!user) return;
 
-  if (!confirm("¿Seguro que deseas borrar TODOS tus turnos?")) return;
+  const confirmar = confirm(
+    "⚠️ Esta acción eliminará TODOS tus turnos (aprobados, pendientes y rechazados).\n\n¿Deseas continuar?"
+  );
+
+  if (!confirmar) return;
 
   try {
     const snap = await db
@@ -200,51 +221,47 @@ btnBorrarTodo.addEventListener("click", async () => {
       .get();
 
     if (snap.empty) {
-      alert("No tienes turnos para borrar");
+      alert("No tienes turnos para borrar.");
       return;
     }
 
     const batch = db.batch();
 
-    snap.forEach(doc => {
+    snap.docs.forEach(doc => {
       batch.delete(doc.ref);
     });
 
     await batch.commit();
 
-    alert("Todos tus turnos fueron eliminados");
+    alert("✅ Todos tus turnos fueron eliminados correctamente.");
     cargarTurnos();
 
   } catch (error) {
     console.error(error);
-    alert("Error al borrar los turnos");
+    alert("❌ Error al borrar los turnos.");
   }
-});
-
-
-function limpiarFormulario() {
-  servicio.value = fi.value = hi.value = ff.value = hf.value = obs.value = "";
-}
-
-function exportarExcel() {
-  const wb = XLSX.utils.table_to_book(document.getElementById("tabla"));
-  XLSX.writeFile(wb, "Turnos.xlsx");
 }
 
 /* ================= AUTH ================= */
 auth.onAuthStateChanged(async user => {
   if (!user) {
-    window.location.href = "control_turnos_login.html";
+    window.location.href = "index.html";
     return;
   }
 
   const perfil = await db.collection("usuarios").doc(user.uid).get();
-  esAdmin = perfil.exists && perfil.data().rol === "admin";
+  esAdmin = perfil.data().rol === "admin";
 
   if (esAdmin) {
     filtroAdmin.style.display = "block";
-    cargarGuardas();
+    const snap = await db.collection("usuarios").get();
+    snap.forEach(d => {
+      filtroGuarda.innerHTML += `<option value="${d.id}">${d.data().nombreCompleto}</option>`;
+    });
   }
 
   cargarTurnos();
 });
+
+filtroGuarda.onchange = cargarTurnos;
+busquedaNombre.oninput = cargarTurnos;
