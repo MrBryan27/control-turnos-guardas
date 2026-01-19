@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel Administrador</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<header>
+  <h2>Panel del Administrador</h2>
+  <button id="btnLogout" class="btn-salir">Cerrar sesión</button>
+</header>
+
+<div class="contenedor">
+
+  <!-- TOTALES -->
+  <div class="resumen">
+    <div>Total horas: <strong id="totalHoras">0</strong></div>
+    <div>Total bruto: <strong>$<span id="totalBruto">0</span></strong></div>
+    <div>Total neto: <strong>$<span id="totalNeto">0</span></strong></div>
+  </div>
+
+  <!-- FILTRO -->
+  <div class="filtro-admin">
+    <label>Filtrar por guarda:</label>
+    <select id="filtroGuarda">
+      <option value="">Todos</option>
+    </select>
+  </div>
+
+  <!-- PENDIENTES -->
+  <section class="seccion">
+    <h3>⏳ Turnos pendientes de aprobación</h3>
+    <div class="tabla-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Guarda</th>
+            <th>Cédula</th>
+            <th>Servicio</th>
+            <th>Inicio</th>
+            <th>Fin</th>
+            <th>Horas</th>
+            <th>Bruto</th>
+            <th>Neto</th>
+            <th>Comentario</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody id="tablaPendientes"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- NÓMINA -->
+  <section class="seccion">
+    <h3>✅ Turnos aprobados para nómina</h3>
+
+    <button id="btnExcel">📊 Exportar nómina</button>
+    <button id="btnCerrarPeriodo">🔒 Cerrar periodo</button>
+
+    <div class="tabla-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Guarda</th>
+            <th>Cédula</th>
+            <th>Servicio</th>
+            <th>Inicio</th>
+            <th>Fin</th>
+            <th>Horas</th>
+            <th>Bruto</th>
+            <th>Neto</th>
+            <th>Comentario Admin</th>
+          </tr>
+        </thead>
+        <tbody id="tablaNomina"></tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script src="firebase.js"></script>
+<script src="admin.js"></script>
+
+</body>
+</html>

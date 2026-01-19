@@ -1,0 +1,168 @@
+/* ================= RESET BÁSICO ================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background-color: #f4f6f9;
+  color: #1f2933;
+}
+
+/* ================= HEADER ================= */
+.header {
+  background: linear-gradient(90deg, #0f172a, #1e293b);
+  color: #ffffff;
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.btn-salir {
+  background: #dc2626;
+  border: none;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-salir:hover {
+  background: #b91c1c;
+}
+
+/* ================= CONTENEDOR ================= */
+.contenedor {
+  max-width: 1300px;
+  margin: 30px auto;
+  padding: 0 20px;
+}
+
+/* ================= TÍTULO SECCIÓN ================= */
+.contenedor h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ================= TABLA ================= */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+thead {
+  background-color: #e5e7eb;
+}
+
+thead th {
+  padding: 12px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #374151;
+  border-bottom: 1px solid #d1d5db;
+}
+
+tbody td {
+  padding: 12px;
+  font-size: 14px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+/* ================= INPUT COMENTARIO ================= */
+tbody input[type="text"] {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+tbody input[type="text"]:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+/* ================= BOTONES ACCIÓN ================= */
+tbody button {
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  margin: 0 2px;
+  transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+tbody button:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+/* Aprobar */
+tbody button:first-child {
+  background-color: #16a34a;
+  color: white;
+}
+
+/* Rechazar */
+tbody button:last-child {
+  background-color: #dc2626;
+  color: white;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 900px) {
+  table {
+    font-size: 12px;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tbody tr {
+    display: block;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #e5e7eb;
+  }
+
+  tbody td {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    text-align: left;
+  }
+
+  tbody td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #374151;
+  }
+}

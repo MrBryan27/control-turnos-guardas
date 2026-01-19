@@ -41,16 +41,16 @@
 
   <!-- FORMULARIO -->
   <div class="formulario">
-    <input type="text" id="servicio" placeholder="Lugar del servicio">
+    <input type="text" id="servicio" placeholder="Nombre de la MN">
     <input type="date" id="fi">
     <input type="time" id="hi">
     <input type="date" id="ff">
     <input type="time" id="hf">
-    <input type="text" id="obs" placeholder="Observaciones">
+    <input type="text" id="obs" placeholder="Puerto u Observaciones">
     <button id="btnGuardar" class="btn btn-azul">Guardar</button>
   </div>
 
-  <!-- TABLA -->
+  <!-- TABLA
   <div class="tabla-responsive">
     <table id="tabla">
       <thead>
@@ -69,7 +69,29 @@
       </thead>
       <tbody></tbody>
     </table>
-  </div>
+  </div> -->
+
+  <div class="tabla-container">
+  <table id="tabla">
+    <thead>
+      <tr>
+        <th>Guarda</th>
+        <th>Cédula</th>
+        <th>Servicio</th>
+        <th>Inicio</th>
+        <th>Fin</th>
+        <th>Horas</th>
+        <th>Bruto</th>
+        <th>Neto</th>
+        <th>Estado</th>
+        <th>Comentario</th>
+        <th>Acción</th>
+      </tr>
+    </thead>
+    <tbody id="tablaBody"></tbody>
+  </table>
+</div>
+
 
   <!-- TOTALES -->
   <div class="totales">

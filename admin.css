@@ -1,0 +1,86 @@
+body {
+  margin: 0;
+  background: #f4f6f9;
+  font-family: "Segoe UI", sans-serif;
+}
+
+header {
+  background: #1e293b;
+  color: white;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.contenedor {
+  max-width: 1400px;
+  margin: 30px auto;
+}
+
+.resumen {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.seccion {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #d1d5db;
+  padding: 10px;
+  text-align: center;
+}
+
+thead {
+  background: #e5e7eb;
+}
+
+.btn-aprobar { background: #22c55e; color: white; }
+.btn-rechazar { background: #ef4444; color: white; }
+.btn-salir { background: #ef4444; color: white; padding: 6px 12px; }
+
+.filtro-admin {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 15px;
+}
+
+
+#btnExcel{
+    padding: 7px;
+    margin: 7px;
+    background-color: #22c55e;
+    cursor: pointer;
+    color: #f4f6f9;
+}
+
+#btnExcel:hover{
+    background-color: #02a602;
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+#btnCerrarPeriodo{
+    padding: 7px;
+    margin: 7px;
+    background-color: #ee3f3f;
+    cursor: pointer;
+    color: #f4f6f9;
+}
+
+#btnCerrarPeriodo:hover{
+    background-color: #a60202;
+    opacity: 0.9;
+    transform: translateY(-1px);
+}

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Supervisor - Control de Turnos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Estilos reutilizados -->
+  <link rel="stylesheet" href="supervisor.css">
+</head>
+<body>
+
+<header class="header">
+  <h2>Panel del Supervisor</h2>
+  <button id="btnLogout" class="btn-salir">Cerrar sesión</button>
+</header>
+
+<section class="contenedor">
+
+  <h3>Turnos pendientes de validación</h3>
+
+  <table id="tabla">
+    <thead>
+      <tr>
+        <th>Guarda</th>
+        <th>Cédula</th>
+        <th>Servicio</th>
+        <th>Inicio</th>
+        <th>Fin</th>
+        <th>Horas</th>
+        <th>Comentario</th>
+        <th>Acción</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+</section>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<!-- Configuración Firebase -->
+<script src="firebase.js"></script>
+
+<!-- Lógica Supervisor -->
+<script src="supervisor.js"></script>
+
+</body>
+</html>

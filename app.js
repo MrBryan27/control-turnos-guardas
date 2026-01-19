@@ -29,54 +29,110 @@ btnVolverLogin.onclick = () => {
 // ================= LOGIN =================
 btnLogin.onclick = async () => {
   try {
-    await auth.signInWithEmailAndPassword(
+    const cred = await auth.signInWithEmailAndPassword(
       loginEmail.value,
       loginPassword.value
     );
-    window.location.href = "turnos.html";
-  } catch (e) {
-    alert(e.message);
-  }
-};
 
-// ================= REGISTRO =================
-btnRegistrar.onclick = async () => {
-  try {
-    // validar cédula única
-    const existe = await db
-      .collection("usuarios")
-      .where("cedula", "==", regCedula.value)
-      .get();
+    const uid = cred.user.uid;
 
-    if (!existe.empty) {
-      alert("La cédula ya está registrada");
+    const doc = await db.collection("usuarios").doc(uid).get();
+
+    if (!doc.exists) {
+      alert("Perfil no encontrado");
       return;
     }
 
-    // crear usuario auth
-    const cred = await auth.createUserWithEmailAndPassword(
-      regEmail.value,
-      regPassword.value
-    );
+    const rol = doc.data().rol;
 
-    // ⬅️ ESPERAMOS a que auth esté listo
-    auth.onAuthStateChanged(async user => {
-      if (!user) return;
+    // 🔁 REDIRECCIÓN POR ROL
+    if (rol === "admin") {
+      window.location.href = "admin.html";
+    } 
+    else if (rol === "supervisor") {
+      window.location.href = "supervisor.html";
+    } 
+    else {
+      window.location.href = "turnos.html"; // guarda
+    }
 
-      await db.collection("usuarios").doc(user.uid).set({
-        nombreCompleto: regNombre.value,
-        cedula: regCedula.value,
-        email: regEmail.value,
-        rol: "guarda",
-        creado: firebase.firestore.FieldValue.serverTimestamp()
-      });
+  } catch (error) {
+    alert(error.message);
+  }
+};
 
-      alert("Registro exitoso");
-      registroBox.style.display = "none";
-      loginBox.style.display = "block";
+
+// ================= REGISTRO =================
+// btnRegistrar.onclick = async () => {
+//   try {
+//     // validar cédula única
+//     const existe = await db
+//       .collection("usuarios")
+//       .where("cedula", "==", regCedula.value)
+//       .get();
+
+//     if (!existe.empty) {
+//       alert("La cédula ya está registrada");
+//       return;
+//     }
+
+//     // crear usuario auth
+//     const cred = await auth.createUserWithEmailAndPassword(
+//       regEmail.value,
+//       regPassword.value
+//     );
+
+//     // ⬅️ ESPERAMOS a que auth esté listo
+//     auth.onAuthStateChanged(async user => {
+//       if (!user) return;
+
+//       await db.collection("usuarios").doc(user.uid).set({
+//         nombreCompleto: regNombre.value,
+//         cedula: regCedula.value,
+//         email: regEmail.value,
+//         rol: "guarda",
+//         creado: firebase.firestore.FieldValue.serverTimestamp()
+//       });
+
+//       alert("Registro exitoso");
+//       registroBox.style.display = "none";
+//       loginBox.style.display = "block";
+//     });
+
+//   } catch (e) {
+//     alert(e.message);
+//   }
+// };
+btnRegistrar.onclick = async () => {
+  try {
+    const nombre = regNombre.value.trim();
+    const cedula = regCedula.value.trim();
+    const email = regEmail.value.trim();
+    const password = regPassword.value;
+
+    if (!nombre || !cedula || !email || !password) {
+      alert("Complete todos los campos");
+      return;
+    }
+
+    // 1️⃣ Crear usuario en Auth
+    const cred = await auth.createUserWithEmailAndPassword(email, password);
+    const uid = cred.user.uid;
+
+    // 2️⃣ Crear perfil en Firestore (MISMO UID)
+    await db.collection("usuarios").doc(uid).set({
+      nombreCompleto: nombre,
+      cedula,
+      email,
+      rol: "guarda", // o guarda / admin
+      creado: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-  } catch (e) {
-    alert(e.message);
+    alert("Usuario registrado correctamente");
+    window.location.href = "index.html";
+
+  } catch (error) {
+    console.error(error);
+    alert(error.message);
   }
 };

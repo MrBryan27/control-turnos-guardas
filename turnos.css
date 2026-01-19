@@ -1,134 +1,266 @@
+/* ================= RESET ================= */
 * {
   box-sizing: border-box;
-  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  margin: 0;
-  padding: 10px;
-  background: #f4f6f8;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background-color: #f4f6f9;
+  color: #1f2933;
 }
 
-/* HEADER */
-.top-bar {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+/* ================= CONTENEDOR PRINCIPAL ================= */
+.contenedor {
+  max-width: 1400px;
+  margin: 30px auto;
+  background: #ffffff;
+  padding: 25px 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
 }
 
-button {
-  padding: 8px 12px;
+/* ================= TÍTULOS ================= */
+h1 {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 26px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* ================= BOTONES ================= */
+.btn {
+  padding: 10px 16px;
+  border-radius: 8px;
   border: none;
-  border-radius: 4px;
+  font-size: 14px;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.btn-logout {
-  background: #1e88e5;
-  color: #fff;
+.btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
-/* FILTRO ADMIN */
+.btn-azul {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.btn-danger {
+  background: #ed3a3af3;
+  color: #ffffff;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 7px;
+}
+.btn-danger:hover{
+  background-color: #ee0404e4;
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn-excel {
+  background: #21e167;
+  color: #ffffff;
+  padding: 8px;
+  border-radius: 7px;
+}
+.btn-excel:hover{
+  background-color: #009b39;
+  opacity: 0.9;
+  transform: translateY(-1px);
+  }
+
+/* ================= LOGOUT ================= */
+#btnLogout {
+  float: right;
+  margin-bottom: 15px;
+}
+
+/* ================= FILTRO ADMIN ================= */
 .filtro-admin {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin: 10px 0;
+  gap: 15px;
+  align-items: center;
+  background: #f1f5f9;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.filtro-admin label {
+  font-weight: 600;
 }
 
 .filtro-admin select,
 .filtro-admin input {
-  padding: 8px;
-  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font-size: 14px;
 }
 
-/* FORMULARIO */
-.form-turno {
+/* ================= FORMULARIO ================= */
+.formulario {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
-  margin-bottom: 10px;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  margin-bottom: 25px;
 }
 
-.form-turno input,
-.form-turno select {
-  padding: 8px;
+.formulario input {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 14px;
 }
 
-.form-turno button {
-  background: #1e88e5;
-  color: #fff;
+.formulario input:focus {
+  outline: none;
+  border-color: #2563eb;
 }
 
-/* TABLA RESPONSIVE */
+.formulario button {
+  grid-column: span 6;
+  justify-self: center;
+  min-width: 200px;
+}
+
+/* ================= TABLA ================= */
 .tabla-container {
   overflow-x: auto;
-  background: #fff;
-  border-radius: 6px;
+  margin-top: 20px;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 900px;
+  background: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
-th, td {
-  border: 1px solid #ccc;
-  padding: 6px;
-  text-align: center;
+thead {
+  background: #e5e7eb;
+}
+
+thead th {
+  padding: 12px;
+  font-size: 13px;
+  text-transform: uppercase;
+  color: #374151;
+  border-bottom: 1px solid #d1d5db;
+}
+
+tbody td {
+  padding: 12px;
   font-size: 14px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: center;
 }
 
-th {
-  background: #e0e0e0;
+tbody tr:hover {
+  background: #f9fafb;
 }
 
-/* BOTONES INFERIORES */
+/* ================= ESTADOS ================= */
+.estado-pendiente {
+  color: #d97706;
+  font-weight: 600;
+}
+
+.estado-aprobado {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.estado-rechazado {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+/* ================= INPUT COMENTARIOS ================= */
+tbody input[type="text"] {
+  width: 100%;
+  padding: 7px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font-size: 13px;
+}
+
+/* ================= BOTONES ACCIÓN TABLA ================= */
+tbody button {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  margin: 0 2px;
+}
+
+tbody button.editar {
+  background: #2563eb;
+  color: white;
+}
+
+tbody button.aprobar {
+  background: #16a34a;
+  color: white;
+}
+
+tbody button.rechazar {
+  background: #dc2626;
+  color: white;
+}
+
+/* ================= TOTALES ================= */
+.totales {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-top: 25px;
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+.totales p {
+  font-weight: 500;
+}
+
+.totales strong {
+  color: #0f172a;
+}
+
+/* ================= ACCIONES ================= */
 .acciones {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 10px;
+  justify-content: space-between;
+  margin-top: 25px;
+  gap: 15px;
 }
 
-.btn-danger {
-  background: #d32f2f;
-  color: #fff;
-}
-
-.acciones .btn-excel {
-  background: #12cb2a;
-  color: #fff;
-}
-
-/* ===================== */
-/*  TABLET Y DESKTOP */
-/* ===================== */
-@media (min-width: 768px) {
-
-  .top-bar {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+/* ================= RESPONSIVE ================= */
+@media (max-width: 900px) {
+  .formulario {
+    grid-template-columns: 1fr;
   }
 
-  .filtro-admin {
-    flex-direction: row;
-    align-items: center;
-  }
-
-  .filtro-admin select,
-  .filtro-admin input {
-    width: auto;
-  }
-
-  .form-turno {
-    grid-template-columns: repeat(6, 1fr);
-    align-items: end;
+  .totales {
+    grid-template-columns: 1fr;
   }
 
   .acciones {
-    flex-direction: row;
+    flex-direction: column;
+  }
+
+  #btnLogout {
+    float: none;
+    width: 100%;
+    margin-bottom: 20px;
   }
 }

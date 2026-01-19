@@ -1,5 +1,14 @@
+/******************** CONFIG ********************/
 const VALOR_HORA = 8775;
 
+/******************** ESTADO ********************/
+let modoEdicion = false;
+let turnoEditandoId = null;
+
+let usuarioActual = null;
+let perfilActual = null;
+
+/******************** ELEMENTOS ********************/
 const servicio = document.getElementById("servicio");
 const fi = document.getElementById("fi");
 const hi = document.getElementById("hi");
@@ -9,46 +18,61 @@ const obs = document.getElementById("obs");
 
 const btnGuardar = document.getElementById("btnGuardar");
 const btnLogout = document.getElementById("btnLogout");
-const btnExcel = document.getElementById("btnExcel");
 const btnBorrarTodo = document.getElementById("btnBorrarTodo");
+const btnExcel = document.getElementById("btnExcel");
 
-const tablaBody = document.querySelector("#tabla tbody");
-
-const filtroAdmin = document.getElementById("filtroAdmin");
-const filtroGuarda = document.getElementById("filtroGuarda");
-const busquedaNombre = document.getElementById("busquedaNombre");
+const tablaBody = document.getElementById("tablaBody");
 
 const totalBruto = document.getElementById("totalBruto");
 const totalNeto = document.getElementById("totalNeto");
 const totalBrutoPagar = document.getElementById("totalBrutoPagar");
 const totalNetoPagar = document.getElementById("totalNetoPagar");
 
-let esAdmin = false;
-let cacheUsuarios = {};
-let turnoEditando = null;
+/******************** SESIÓN ********************/
+auth.onAuthStateChanged(async user => {
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
 
-/* ================= LOGOUT ================= */
-btnLogout.onclick = async () => {
+  usuarioActual = user;
+
+  const perfilDoc = await db.collection("usuarios").doc(user.uid).get();
+  perfilActual = perfilDoc.data();
+
+  cargarTurnosGuarda();
+});
+
+/******************** LOGOUT ********************/
+btnLogout.addEventListener("click", async () => {
   await auth.signOut();
   window.location.href = "index.html";
-};
+});
 
-/* ================= GUARDAR / CORREGIR ================= */
-btnGuardar.onclick = async () => {
-  const user = auth.currentUser;
-  if (!user) return;
+/******************** GUARDAR / ACTUALIZAR TURNO ********************/
+btnGuardar.addEventListener("click", async () => {
+  if (!usuarioActual) return;
+
+  if (!servicio.value || !fi.value || !hi.value || !ff.value || !hf.value) {
+    alert("Complete todos los campos");
+    return;
+  }
 
   const inicio = new Date(`${fi.value}T${hi.value}`);
   const fin = new Date(`${ff.value}T${hf.value}`);
   const horas = (fin - inicio) / 3600000;
 
   if (horas <= 0) {
-    alert("Fechas u horas inválidas");
+    alert("Horas inválidas");
     return;
   }
 
-  const data = {
-    uid: user.uid,
+  if (modoEdicion && !obs.value.trim()) {
+    alert("Debe indicar el motivo de la corrección");
+    return;
+  }
+
+  const dataTurno = {
     servicio: servicio.value,
     fi: fi.value,
     hi: hi.value,
@@ -57,86 +81,72 @@ btnGuardar.onclick = async () => {
     horas,
     bruto: horas * VALOR_HORA,
     neto: horas * VALOR_HORA * 0.92,
-    estado: "pendiente",
-    comentarioGuarda: "",
-    comentarioAdmin: "",
-    creado: firebase.firestore.FieldValue.serverTimestamp()
+    comentarioGuarda: obs.value.trim(),
+    estado: "pendiente_supervisor",
+    actualizado: firebase.firestore.FieldValue.serverTimestamp()
   };
 
-  if (turnoEditando) {
-    data.estado = "corregido";
-    data.comentarioGuarda = obs.value;
+  if (modoEdicion) {
+    await db.collection("turnos").doc(turnoEditandoId).update({
+      ...dataTurno,
+      comentarioSupervisor: "",
+      comentarioAdmin: ""
+    });
 
-    await db.collection("turnos").doc(turnoEditando).update(data);
-    turnoEditando = null;
+    modoEdicion = false;
+    turnoEditandoId = null;
+    btnGuardar.innerText = "Guardar turno";
   } else {
-    await db.collection("turnos").add(data);
+    await db.collection("turnos").add({
+      uid: usuarioActual.uid,
+      ...dataTurno,
+      creado: firebase.firestore.FieldValue.serverTimestamp()
+    });
   }
 
   limpiarFormulario();
-  cargarTurnos();
-};
+  cargarTurnosGuarda();
+});
 
-/* ================= CARGAR TURNOS ================= */
-async function cargarTurnos() {
+/******************** CARGAR TURNOS ********************/
+async function cargarTurnosGuarda() {
   tablaBody.innerHTML = "";
 
-  let bruto = 0, neto = 0, brutoPagar = 0, netoPagar = 0;
+  let tBruto = 0;
+  let tNeto = 0;
+  let tBrutoPagar = 0;
+  let tNetoPagar = 0;
 
-  let query = db.collection("turnos");
+  const snap = await db.collection("turnos")
+    .where("uid", "==", usuarioActual.uid)
+    .orderBy("creado", "desc")
+    .get();
 
-  if (!esAdmin) {
-    query = query.where("uid", "==", auth.currentUser.uid);
-  } else if (filtroGuarda.value) {
-    query = query.where("uid", "==", filtroGuarda.value);
-  }
-
-  const snap = await query.get();
-
-  for (const doc of snap.docs) {
+  snap.forEach(doc => {
     const t = doc.data();
-    const u = await obtenerUsuario(t.uid);
 
-    if (
-      busquedaNombre.value &&
-      !u.nombreCompleto.toLowerCase().includes(busquedaNombre.value.toLowerCase())
-    ) continue;
+    tBruto += t.bruto;
+    tNeto += t.neto;
 
-    bruto += t.bruto;
-    neto += t.neto;
-
-    if (t.estado === "aprobado") {
-      brutoPagar += t.bruto;
-      netoPagar += t.neto;
+    if (t.estado === "aprobado_admin") {
+      tBrutoPagar += t.bruto;
+      tNetoPagar += t.neto;
     }
 
-    let acciones = "";
-
-    /* ===== ACCIONES GUARDA ===== */
-    if (!esAdmin && t.estado === "rechazado") {
-      acciones = `
-        <div class="comentario rojo">
-          <strong>Admin:</strong> ${t.comentarioAdmin}
-        </div>
-        <button onclick="editarTurno('${doc.id}', '${t.servicio}', '${t.fi}', '${t.hi}', '${t.ff}', '${t.hf}')">
-          ✏️ Corregir
-        </button>
-      `;
+    let comentario = "";
+    if (t.estado.includes("rechazado")) {
+      comentario = t.comentarioSupervisor || t.comentarioAdmin || "";
     }
 
-    /* ===== ACCIONES ADMIN ===== */
-    if (esAdmin) {
-      acciones = `
-        <button onclick="aprobar('${doc.id}')">✔</button>
-        <button onclick="rechazar('${doc.id}')">✖</button>
-        ${t.comentarioGuarda ? `<div class="comentario azul"><strong>Guarda:</strong> ${t.comentarioGuarda}</div>` : ""}
-      `;
+    let accion = "";
+    if (t.estado === "rechazado_supervisor" || t.estado === "rechazado_admin") {
+      accion = `<button class="btn-edit" onclick="editarTurno('${doc.id}')">✏️ Editar</button>`;
     }
 
     tablaBody.innerHTML += `
       <tr>
-        <td>${u.nombreCompleto}</td>
-        <td>${u.cedula}</td>
+        <td>${perfilActual.nombreCompleto}</td>
+        <td>${perfilActual.cedula}</td>
         <td>${t.servicio}</td>
         <td>${t.fi} ${t.hi}</td>
         <td>${t.ff} ${t.hf}</td>
@@ -144,153 +154,65 @@ async function cargarTurnos() {
         <td>$${t.bruto.toFixed(0)}</td>
         <td>$${t.neto.toFixed(0)}</td>
         <td>${t.estado}</td>
-        <td>${acciones}</td>
+        <td>${comentario}</td>
+        <td>${accion}</td>
       </tr>
     `;
-  }
+  });
 
-  totalBruto.innerText = `$${bruto.toFixed(0)}`;
-  totalNeto.innerText = `$${neto.toFixed(0)}`;
-  totalBrutoPagar.innerText = `$${brutoPagar.toFixed(0)}`;
-  totalNetoPagar.innerText = `$${netoPagar.toFixed(0)}`;
+  totalBruto.innerText = `$${tBruto.toFixed(0)}`;
+  totalNeto.innerText = `$${tNeto.toFixed(0)}`;
+  totalBrutoPagar.innerText = `$${tBrutoPagar.toFixed(0)}`;
+  totalNetoPagar.innerText = `$${tNetoPagar.toFixed(0)}`;
 }
 
-/* ================= EDITAR ================= */
-function editarTurno(id, s, fiV, hiV, ffV, hfV) {
-  turnoEditando = id;
-  servicio.value = s;
-  fi.value = fiV;
-  hi.value = hiV;
-  ff.value = ffV;
-  hf.value = hfV;
+/******************** EDITAR TURNO ********************/
+async function editarTurno(turnoId) {
+  const doc = await db.collection("turnos").doc(turnoId).get();
+  if (!doc.exists) return;
+
+  const t = doc.data();
+
+  servicio.value = t.servicio;
+  fi.value = t.fi;
+  hi.value = t.hi;
+  ff.value = t.ff;
+  hf.value = t.hf;
   obs.value = "";
+
+  modoEdicion = true;
+  turnoEditandoId = turnoId;
+  btnGuardar.innerText = "Enviar corrección";
 }
 
-/* ================= ADMIN ================= */
-async function aprobar(id) {
-  await db.collection("turnos").doc(id).update({
-    estado: "aprobado",
-    comentarioAdmin: ""
-  });
-  cargarTurnos();
-}
+/******************** BORRAR TODOS ********************/
+btnBorrarTodo.addEventListener("click", async () => {
+  if (!confirm("¿Seguro que desea borrar TODOS sus turnos?")) return;
 
-async function rechazar(id) {
-  const motivo = prompt("Motivo del rechazo:");
-  if (!motivo) return;
+  const snap = await db.collection("turnos")
+    .where("uid", "==", usuarioActual.uid)
+    .get();
 
-  await db.collection("turnos").doc(id).update({
-    estado: "rechazado",
-    comentarioAdmin: motivo
-  });
-  cargarTurnos();
-}
+  const batch = db.batch();
+  snap.docs.forEach(d => batch.delete(d.ref));
+  await batch.commit();
 
-/* ================= UTIL ================= */
-function limpiarFormulario() {
-  servicio.value = fi.value = hi.value = ff.value = hf.value = obs.value = "";
-}
-
-async function obtenerUsuario(uid) {
-  if (cacheUsuarios[uid]) return cacheUsuarios[uid];
-  const doc = await db.collection("usuarios").doc(uid).get();
-  cacheUsuarios[uid] = doc.data();
-  return doc.data();
-}
-
-/* ================= BORRAR TODOS LOS TURNOS ================= */
-
-if (btnBorrarTodo) {
-  btnBorrarTodo.addEventListener("click", borrarTodosMisTurnos);
-}
-
-async function borrarTodosMisTurnos() {
-  const user = auth.currentUser;
-  if (!user) return;
-
-  const confirmar = confirm(
-    "⚠️ Esta acción eliminará TODOS tus turnos (aprobados, pendientes y rechazados).\n\n¿Deseas continuar?"
-  );
-
-  if (!confirmar) return;
-
-  try {
-    const snap = await db
-      .collection("turnos")
-      .where("uid", "==", user.uid)
-      .get();
-
-    if (snap.empty) {
-      alert("No tienes turnos para borrar.");
-      return;
-    }
-
-    const batch = db.batch();
-
-    snap.docs.forEach(doc => {
-      batch.delete(doc.ref);
-    });
-
-    await batch.commit();
-
-    alert("✅ Todos tus turnos fueron eliminados correctamente.");
-    cargarTurnos();
-
-  } catch (error) {
-    console.error(error);
-    alert("❌ Error al borrar los turnos.");
-  }
-}
-
-/* ================= EXCEL ================= */
-
-if (btnExcel) {
-  btnExcel.addEventListener("click", exportarExcel);
-}
-
-function exportarExcel() {
-  const tabla = document.getElementById("tabla");
-
-  if (!tabla || tabla.rows.length <= 1) {
-    alert("No hay datos para exportar");
-    return;
-  }
-
-  try {
-    const wb = XLSX.utils.table_to_book(tabla, {
-      sheet: "Turnos"
-    });
-
-    XLSX.writeFile(wb, "turnos.xlsx");
-  } catch (error) {
-    console.error(error);
-    alert("Error al exportar el archivo Excel");
-  }
-}
-
-/* ================= AUTH ================= */
-auth.onAuthStateChanged(async user => {
-  if (!user) {
-    window.location.href = "index.html";
-    return;
-  }
-
-  const perfil = await db.collection("usuarios").doc(user.uid).get();
-  esAdmin = perfil.data().rol === "admin";
-
-  if (esAdmin) {
-    filtroAdmin.style.display = "block";
-    const snap = await db.collection("usuarios").get();
-    snap.forEach(d => {
-      filtroGuarda.innerHTML += `<option value="${d.id}">${d.data().nombreCompleto}</option>`;
-    });
-  }
-
-  cargarTurnos();
+  cargarTurnosGuarda();
 });
 
-filtroGuarda.onchange = cargarTurnos;
-busquedaNombre.oninput = cargarTurnos;
+/******************** EXPORTAR EXCEL ********************/
+btnExcel.addEventListener("click", () => {
+  const tabla = document.getElementById("tabla");
+  const wb = XLSX.utils.table_to_book(tabla);
+  XLSX.writeFile(wb, "Mis_Turnos.xlsx");
+});
 
-
-
+/******************** LIMPIAR ********************/
+function limpiarFormulario() {
+  servicio.value = "";
+  fi.value = "";
+  hi.value = "";
+  ff.value = "";
+  hf.value = "";
+  obs.value = "";
+}
