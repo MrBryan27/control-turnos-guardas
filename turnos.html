@@ -40,15 +40,47 @@
   <h1>Control Mensual de Turnos</h1>
 
   <!-- FORMULARIO -->
-  <div class="formulario">
-    <input type="text" id="servicio" placeholder="Nombre de la MN">
-    <input type="date" id="fi">
-    <input type="time" id="hi">
-    <input type="date" id="ff">
-    <input type="time" id="hf">
-    <input type="text" id="obs" placeholder="Puerto u Observaciones">
-    <button id="btnGuardar" class="btn btn-azul">Guardar</button>
+  <div class="form-card">
+  <h2 class="form-title">Registrar turno</h2>
+
+  <div class="form-grid">
+
+    <div class="form-group">
+      <label>Nombre de la MN</label>
+      <input type="text" id="servicio" placeholder="Ej: GARDENIA">
+    </div>
+
+        <div class="form-group">
+      <label>Inicio (fecha)</label>
+      <input type="date" id="fi">
+    </div>
+
+    <div class="form-group">
+      <label>Inicio (hora)</label>
+      <input type="time" id="hi">
+    </div>
+
+    <div class="form-group">
+      <label>Final (fecha)</label>
+      <input type="date" id="ff">
+    </div>
+
+    <div class="form-group">
+      <label>Final (hora)</label>
+      <input type="time" id="hf">
+    </div>
+    <div class="form-group">
+      <label>Puerto u observaciones</label>
+      <input type="text" id="obs" placeholder="Ej: Puerto Norte">
+    </div>
+
   </div>
+
+  <button id="btnGuardar" class="btn-primary">
+    💾 Guardar turno
+  </button>
+</div>
+
 
   <!-- TABLA
   <div class="tabla-responsive">
