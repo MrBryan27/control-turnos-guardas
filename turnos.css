@@ -106,7 +106,7 @@ h1 {
 
 /* ================= FORMULARIO ================= */
 .formulario {
-  display: grid;
+  display: contents;
   grid-template-columns: repeat(6, 1fr);
   gap: 12px;
   margin-bottom: 25px;
